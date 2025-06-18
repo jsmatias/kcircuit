@@ -61,6 +61,14 @@ class Shape(ABC):
         self._build_connectors()
         self._build_contour()
 
+    def limit_points(self) -> tuple[tuple[float, float], tuple[float, float]]:
+        x_min = min(self.contour[0]) 
+        x_max = max(self.contour[0]) 
+        y_min = min(self.contour[1]) 
+        y_max = max(self.contour[1]) 
+
+        return (x_min, y_min), (x_max, y_max)
+
     def show(self, ax: Axes | None=None, show_indices: bool=False) -> Axes:
         pl.ion()
         if ax is None:

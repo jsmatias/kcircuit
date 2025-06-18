@@ -10,6 +10,15 @@ class Vector:
 
     def __sub__(self, other: "Vector"):
         return Vector(self.x - other.x, self.y - other.y)
+    
+    def __mul__(self, scalar: int | float):
+        return Vector(self.x * scalar, self.y * scalar)
+    
+    def __rmul__(self, scalar: int | float):
+        return self.__mul__(scalar)
+
+    def __imul__(self, scalar: int | float):
+        return self.__mul__(scalar)
 
     def __truediv__(self, scalar: float | int) -> "Vector":
         if scalar == 0:

@@ -5,10 +5,14 @@ from ._polygon import Polygon
 
 class Taper(Polygon):
     """
-    |''--....__
-    |          |
-    |          |
-    |__..----''
+    A taper structure has a varying width proportional to a tarper function with an coefficient `m`.
+    For `m=1` the function becames linear and the taper is reduced to a trapezoid. 
+    ```
+    |''---....__
+    |           |
+    |           |
+    |__...----''
+    ```
     """
 
     def build_vectors(
