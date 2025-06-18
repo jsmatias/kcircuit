@@ -1,0 +1,9 @@
+# docs
+doc/
+
+# venvs
+venv/
+.python-version
+
+# python cache files
+__pycache__/
