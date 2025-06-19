@@ -27,6 +27,8 @@ class Circular(Shape):
                 internal_r * math.sin(angle_radians),
             ),
         ]
+        self.contour_vectors = self._build_contour_vectors()
+
 
     def _build_edges(self) -> None:
         self.edges = [
@@ -40,56 +42,62 @@ class Circular(Shape):
             (self.vectors[2] + self.vectors[(3) % len(self.vectors)]) / 2,
         ]
 
-    def _build_contour(self):
+    def _build_contour_vectors(self, n_points: int=1) -> list[Vector]:
 
-        # Vectors relative to the center
-        an_internal_r = self.vectors[0] - self.centre
-        another_internal_r = self.vectors[3] - self.centre
-        an_external_r = self.vectors[1] - self.centre
+        internal_r0 = self.vectors[0] - self.centre
+        internal_r1 = self.vectors[3] - self.centre
+        external_r0 = self.vectors[1] - self.centre
 
-        # Get the correct counterclockwise angles
-        start_angle = math.atan2(an_internal_r.y, an_internal_r.x)
-        end_angle = math.atan2(another_internal_r.y, another_internal_r.x)
+        start_angle = internal_r0.angle_ccw_with(Vector(1, 0)) 
+        end_angle = internal_r1.angle_ccw_with(Vector(1, 0)) 
+        angle_range = np.linspace(start_angle, end_angle, int(end_angle - start_angle) * n_points)
 
-        # Ensure counterclockwise order
-        if end_angle < start_angle:
-            end_angle += 2 * math.pi
+        contour_vectors: list[Vector] = []
+        for angle in angle_range:
+            angle_rad = math.radians(angle)
+            ex_x = external_r0.magnitude() * math.cos(angle_rad) + self.centre.x
+            ex_y = external_r0.magnitude() * math.sin(angle_rad) + self.centre.y
+            contour_vectors.append(Vector(ex_x, ex_y))
 
-        angle_range = np.arange(start_angle, end_angle, 0.01)
+        for angle in angle_range[::-1]:
+            angle_rad = math.radians(angle)
+            in_x = internal_r0.magnitude() * math.cos(angle_rad) + self.centre.x
+            in_y = internal_r0.magnitude() * math.sin(angle_rad) + self.centre.y
+            contour_vectors.append(Vector(in_x, in_y))
+        
+        # contour_vectors.append(contour_vectors[-1])
+        return contour_vectors
+        
 
-        # an_internal_r = self.vectors[0] - self.centre
-        # another_internal_r = self.vectors[3] - self.centre
-        # an_external_r = self.vectors[1] - self.centre
+        # # Get the correct counterclockwise angles
+        # start_angle = math.atan2(an_internal_r.y, an_internal_r.x)
+        # end_angle = math.atan2(another_internal_r.y, another_internal_r.x)
 
-        # start_angle = an_internal_r.angle_with(Vector(1, 0))
-        # end_angle = another_internal_r.angle_with(Vector(1, 0))
-        # start_angle_radians = math.radians(
-        #     360 - start_angle if an_internal_r.y < 0 else start_angle
+        # # Ensure counterclockwise order
+        # if end_angle < start_angle:
+        #     end_angle += 2 * math.pi
+
+
+
+        # self.contour = (
+        #     [self.vectors[0].x]
+        #     + [
+        #         an_external_r.magnitude() * math.cos(angle_i) + self.centre.x
+        #         for angle_i in angle_range
+        #     ]
+        #     + [self.vectors[2].x]
+        #     + [
+        #         an_internal_r.magnitude() * math.cos(angle_i) + self.centre.x
+        #         for angle_i in angle_range[::-1]
+        #     ],
+        #     [self.vectors[0].y]
+        #     + [
+        #         an_external_r.magnitude() * math.sin(angle_i) + self.centre.y
+        #         for angle_i in angle_range
+        #     ]
+        #     + [self.vectors[2].y]
+        #     + [
+        #         an_internal_r.magnitude() * math.sin(angle_i) + self.centre.y
+        #         for angle_i in angle_range[::-1]
+        #     ],
         # )
-        # end_angle_radians = math.radians(
-        #     360 - end_angle if another_internal_r.y < 0 else end_angle
-        # )
-        # angle_range = np.arange(start_angle_radians, end_angle_radians, 0.01)
-
-        self.contour = (
-            [self.vectors[0].x]
-            + [
-                an_external_r.magnitude() * math.cos(angle_i) + self.centre.x
-                for angle_i in angle_range
-            ]
-            + [self.vectors[2].x]
-            + [
-                an_internal_r.magnitude() * math.cos(angle_i) + self.centre.x
-                for angle_i in angle_range[::-1]
-            ],
-            [self.vectors[0].y]
-            + [
-                an_external_r.magnitude() * math.sin(angle_i) + self.centre.y
-                for angle_i in angle_range
-            ]
-            + [self.vectors[2].y]
-            + [
-                an_internal_r.magnitude() * math.sin(angle_i) + self.centre.y
-                for angle_i in angle_range[::-1]
-            ],
-        )

@@ -57,25 +57,39 @@ class Circuit:
 
         return (x_min, y_min), (x_max, y_max)
 
-
     def plot(self):
-
         ((x_min, y_min), (x_max, y_max)) = self.limit_points()
 
-        height = y_max - y_min
-        width = x_max - x_min
-        ratio = height / width
-        padding = 0.1
+        min_width = 5
+        min_height = 5
 
-        x_lims = ((1 + padding) * x_min, (1 + padding) * x_max)
-        y_lims = ((1 + padding) * y_min, (1 + padding) * y_max)
-        print(*x_lims)
-        print(*y_lims)
-        _, ax = pl.subplots(figsize=(7 / ratio, 7))
+        width = x_max - x_min
+        height = y_max - y_min
+
+        if width < min_width:
+            center_x = (x_min + x_max) / 2
+            x_min = center_x - min_width / 2
+            x_max = center_x + min_width / 2
+            width = min_width
+
+        if height < min_height:
+            center_y = (y_min + y_max) / 2
+            y_min = center_y - min_height / 2
+            y_max = center_y + min_height / 2
+            height = min_height
+
+        padding = 0.1
+        x_lims = (x_min - padding * width, x_max + padding * width)
+        y_lims = (y_min - padding * height, y_max + padding * height)
+
+        _, ax = pl.subplots(figsize=(10, 10 * height / width))  # or fixed like (8, 8)
+        ax.set_aspect("equal")
+
         for shape in self.shapes:
             shape.show(ax)
-            ax.set_xlim(*x_lims)
-            ax.set_ylim(*y_lims)
-            ax.grid(ls="--")
 
-
+        ax.set_xlim(*x_lims)
+        ax.set_ylim(*y_lims)
+        ax.grid(ls="--")
+        pl.show()
+        

@@ -1,0 +1,5 @@
+ipykernel==6.29.5
+ipympl==0.9.7
+klayout
+matplotlib==3.10.3
+numpy==2.3.0

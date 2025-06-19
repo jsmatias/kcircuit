@@ -15,6 +15,6 @@ class Rectangle(Polygon):
         self.length = length
 
         for sign in [(1, 1), (-1, 1), (-1, -1), (1, -1)]:
-            self.vectors.append(
-                Vector(sign[0] * self.length / 2, sign[1] * self.width / 2)
-            )
+            vertix = Vector(sign[0] * self.length / 2, sign[1] * self.width / 2)
+            self.vectors.append(vertix)
+            self.contour_vectors.append(vertix)

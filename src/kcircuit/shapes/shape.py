@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Literal
 
 import matplotlib.pyplot as pl
 from matplotlib.axes import Axes
@@ -15,7 +16,8 @@ class Shape(ABC):
     contour: tuple[list[float], list[float]]
 
     def __init__(self, *args, **kwargs):
-        self.vectors = []
+        self.vectors: list[Vector] = []
+        self.contour_vectors: list[Vector] = []
         self.edges = []
         self.connectors = []
         self.contour = ([], [])
@@ -37,9 +39,11 @@ class Shape(ABC):
     def _build_connectors(self) -> None:
         pass
 
-    @abstractmethod
-    def _build_contour(self) -> None:
-        pass
+    def _build_contour(self):
+        self.contour = (
+            [v.x for v in self.contour_vectors + [self.contour_vectors[0]]],
+            [v.y for v in self.contour_vectors + [self.contour_vectors[0]]],
+        )
 
     def to_klayout(self, unit:str = "nm") -> kdb.Polygon:
         """Convert to int considering units!"""
@@ -48,6 +52,8 @@ class Shape(ABC):
 
     def shift(self, shift_vector: Vector) -> None:
         self.vectors = [v + shift_vector for v in self.vectors]
+        self.contour_vectors = [v + shift_vector for v in self.contour_vectors]
+
         self.centre += shift_vector
         self._build_edges()
         self._build_connectors()
@@ -57,9 +63,43 @@ class Shape(ABC):
         for i, v in enumerate(self.vectors):
             rotated_v = (v - self.centre).rotate(angle_degrees) + self.centre
             self.vectors[i] = rotated_v
+
+        for i, v in enumerate(self.contour_vectors):
+            rotated_v = (v - self.centre).rotate(angle_degrees) + self.centre
+            self.contour_vectors[i] = rotated_v
         self._build_edges()
         self._build_connectors()
         self._build_contour()
+
+    def flip(self, axis: Literal["x", "y", "xy"]) -> None:
+        for v in self.vectors:
+            if "x" in axis:
+                v.y = -v.y
+            if "y" in axis:
+                v.x = -v.x
+
+        for v in self.contour_vectors:
+            if "x" in axis:
+                v.y = -v.y
+            if "y" in axis:
+                v.x = -v.x
+        
+        self._build_edges()
+        self._build_connectors()
+        self._build_contour()
+
+    def mirror(self, x_axis_pos: float | None=None, y_axis_pos: float | None=None) -> None:
+        
+        if y_axis_pos is not None:
+            self.shift(Vector(-y_axis_pos, 0))
+            self.flip(axis="y")
+            self.shift(Vector(y_axis_pos, 0))
+        
+        if x_axis_pos is not None:
+            self.shift(Vector(-x_axis_pos, 0))
+            self.flip(axis="x")
+            self.shift(Vector(x_axis_pos, 0))
+
 
     def limit_points(self) -> tuple[tuple[float, float], tuple[float, float]]:
         x_min = min(self.contour[0]) 

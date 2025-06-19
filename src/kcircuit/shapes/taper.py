@@ -36,16 +36,6 @@ class Taper(Polygon):
 
         self.contour_vectors = self._build_contour_vectors()
 
-    def shift(self, shift_vector: Vector) -> None:
-        self.contour_vectors = [v + shift_vector for v in self.contour_vectors]
-        super().shift(shift_vector)
-    
-    def rotate(self, angle_degrees: float) -> None:
-        for i, v in enumerate(self.contour_vectors):
-            rotated_v = (v - self.centre).rotate(angle_degrees) + self.centre
-            self.contour_vectors[i] = rotated_v
-        super().rotate(angle_degrees)
-
     def _taper_width(self, x: float) -> float:
         """
         This is centred in x=0.
@@ -59,7 +49,7 @@ class Taper(Polygon):
         alpha = (w1 - w2) / l ** m
         return alpha * (l / 2 - x) ** m + w2
 
-    def _build_contour_vectors(self, n_points: int=10):
+    def _build_contour_vectors(self, n_points: int=10) -> list[Vector]:
 
         x_arr = list(np.linspace(-self.length / 2, self.length / 2, n_points)[::-1])
         y_arr = [self._taper_width(x) / 2 for x in x_arr]
@@ -73,10 +63,4 @@ class Taper(Polygon):
 
         return contour_vectors
 
-    def _build_contour(self, n_points: int=10):
-
-        self.contour = (
-            [v.x for v in self.contour_vectors + [self.contour_vectors[0]]],
-            [v.y for v in self.contour_vectors + [self.contour_vectors[0]]],
-        )
 
