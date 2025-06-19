@@ -1,4 +1,4 @@
-import matplotlib.pyplot as pl
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
 from ..shapes.shape import Shape
@@ -84,7 +84,7 @@ class Circuit:
         y_lims = (y_min - padding * height, y_max + padding * height)
 
         if ax is None:
-            _, ax = pl.subplots(figsize=(10, 10))
+            _, ax = plt.subplots(figsize=(10, 10))
 
         ax.set_aspect("equal")
 
@@ -94,7 +94,6 @@ class Circuit:
         ax.set_xlim(*x_lims)
         ax.set_ylim(*y_lims)
         ax.grid(ls="--")
-        pl.show()
-        
+        plt.tight_layout()
         return ax
         
