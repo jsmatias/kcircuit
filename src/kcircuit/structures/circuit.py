@@ -1,4 +1,5 @@
 import matplotlib.pyplot as pl
+from matplotlib.axes import Axes
 
 from ..shapes.shape import Shape
 from ..shapes._vector import Vector
@@ -57,7 +58,7 @@ class Circuit:
 
         return (x_min, y_min), (x_max, y_max)
 
-    def plot(self):
+    def plot(self, ax: Axes | None=None) -> Axes:
         ((x_min, y_min), (x_max, y_max)) = self.limit_points()
 
         min_width = 5
@@ -82,14 +83,18 @@ class Circuit:
         x_lims = (x_min - padding * width, x_max + padding * width)
         y_lims = (y_min - padding * height, y_max + padding * height)
 
-        _, ax = pl.subplots(figsize=(10, 10 * height / width))  # or fixed like (8, 8)
+        if ax is None:
+            _, ax = pl.subplots(figsize=(10, 10))
+
         ax.set_aspect("equal")
 
         for shape in self.shapes:
-            shape.show(ax)
+            shape.plot(ax)
 
         ax.set_xlim(*x_lims)
         ax.set_ylim(*y_lims)
         ax.grid(ls="--")
         pl.show()
+        
+        return ax
         

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Literal
 
-import matplotlib.pyplot as pl
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 import klayout.db as kdb
 
@@ -109,12 +109,13 @@ class Shape(ABC):
 
         return (x_min, y_min), (x_max, y_max)
 
-    def show(self, ax: Axes | None=None, show_indices: bool=False) -> Axes:
-        pl.ion()
+
+    def plot(self, ax: Axes | None = None, show_indices: bool = False) -> Axes:
+        plt.ion()
         if ax is None:
-            _, ax = pl.subplots(figsize=(7, 7))
-        x = self.contour[0]
-        y = self.contour[1]
+            _, ax = plt.subplots(figsize=(7, 7))
+
+        x, y = self.contour
         ax.plot(x, y, color="orangered")
 
         x1 = [c.x for c in self.connectors]
@@ -126,7 +127,22 @@ class Shape(ABC):
             for i, connector in enumerate(self.connectors):
                 ax.text(connector.x, connector.y, str(i), fontsize=10, ha="right")
 
-        ax.set_xlim(-10, 10)
-        ax.set_ylim(-10, 10)
-        pl.tight_layout()
+        (x_min, y_min), (x_max, y_max) = self.limit_points()
+
+        min_size = 1.0
+        width = max(x_max - x_min, min_size)
+        height = max(y_max - y_min, min_size)
+
+        cx = (x_min + x_max) / 2
+        cy = (y_min + y_max) / 2
+        x_min, x_max = cx - width / 2, cx + width / 2
+        y_min, y_max = cy - height / 2, cy + height / 2
+
+        padding = 0.1
+        ax.set_xlim(x_min - padding * width, x_max + padding * width)
+        ax.set_ylim(y_min - padding * height, y_max + padding * height)
+        ax.set_aspect("equal")
+        ax.grid(ls="--")
+        plt.tight_layout()
+
         return ax
