@@ -1,13 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from .shape import Shape
 
 
 class Polygon(Shape, ABC):
-
-    @abstractmethod
-    def build_vectors(self, *args, **kwargs) -> None:
-        pass
 
     # TODO: Def build_contour_vectors
 

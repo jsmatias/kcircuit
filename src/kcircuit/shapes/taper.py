@@ -15,20 +15,19 @@ class Taper(Polygon):
     ```
     """
 
-    def build_vectors(
-        self, 
+    def __init__(self, 
         wide_width: float, 
         narrow_width: float, 
         length: float, 
-        taper_exponent: float = 1, 
-        *args, **kwargs # type: ignore
-    ) -> None:
-        
-        self.narrow_width = narrow_width
+        taper_exponent: float = 1
+    ):
         self.wide_width = wide_width
+        self.narrow_width = narrow_width
         self.length = length
         self.taper_exponent = taper_exponent
+        super().__init__()
 
+    def build_vectors(self) -> None:
         self.vectors.append(Vector(+ self.length / 2, + self.narrow_width / 2))
         self.vectors.append(Vector(- self.length / 2, + self.wide_width / 2))
         self.vectors.append(Vector(- self.length / 2, - self.wide_width / 2))
@@ -52,14 +51,14 @@ class Taper(Polygon):
     def _build_contour_vectors(self, n_points: int=10) -> list[Vector]:
 
         x_arr = list(np.linspace(-self.length / 2, self.length / 2, n_points)[::-1])
-        y_arr = [self._taper_width(x) / 2 for x in x_arr]
+        y_arr = [self._taper_width(float(x)) / 2 for x in x_arr]
         
         x_arr = x_arr + x_arr[::-1]
         y_arr = y_arr + [-y for y in y_arr[::-1]]
 
         contour_vectors: list[Vector] = []
         for x, y in zip(x_arr, y_arr):
-            contour_vectors.append(Vector(x, y))
+            contour_vectors.append(Vector(float(x), y))
 
         return contour_vectors
 

@@ -7,13 +7,17 @@ from .shape import Shape
 
 class Circular(Shape):
 
-    def build_vectors(
-        self, width: float, radius: float, angle_degrees: float, *args, **kwargs
-    ) -> None:
-        angle_radians = math.radians(angle_degrees)
+    def __init__(self, width: float, radius: float, angle_degrees: float):
+        self.width = width
+        self.radius = radius
+        self.angle_degrees = angle_degrees
+        super().__init__()
 
-        internal_r = radius - width / 2
-        external_r = radius + width / 2
+    def build_vectors(self) -> None:
+        angle_radians = math.radians(self.angle_degrees)
+
+        internal_r = self.radius - self.width / 2
+        external_r = self.radius + self.width / 2
 
         self.vectors = [
             Vector(internal_r, 0),
@@ -65,39 +69,4 @@ class Circular(Shape):
             in_y = internal_r0.magnitude() * math.sin(angle_rad) + self.centre.y
             contour_vectors.append(Vector(in_x, in_y))
         
-        # contour_vectors.append(contour_vectors[-1])
         return contour_vectors
-        
-
-        # # Get the correct counterclockwise angles
-        # start_angle = math.atan2(an_internal_r.y, an_internal_r.x)
-        # end_angle = math.atan2(another_internal_r.y, another_internal_r.x)
-
-        # # Ensure counterclockwise order
-        # if end_angle < start_angle:
-        #     end_angle += 2 * math.pi
-
-
-
-        # self.contour = (
-        #     [self.vectors[0].x]
-        #     + [
-        #         an_external_r.magnitude() * math.cos(angle_i) + self.centre.x
-        #         for angle_i in angle_range
-        #     ]
-        #     + [self.vectors[2].x]
-        #     + [
-        #         an_internal_r.magnitude() * math.cos(angle_i) + self.centre.x
-        #         for angle_i in angle_range[::-1]
-        #     ],
-        #     [self.vectors[0].y]
-        #     + [
-        #         an_external_r.magnitude() * math.sin(angle_i) + self.centre.y
-        #         for angle_i in angle_range
-        #     ]
-        #     + [self.vectors[2].y]
-        #     + [
-        #         an_internal_r.magnitude() * math.sin(angle_i) + self.centre.y
-        #         for angle_i in angle_range[::-1]
-        #     ],
-        # )

@@ -15,20 +15,22 @@ class Shape(ABC):
     centre: Vector
     contour: tuple[list[float], list[float]]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         self.vectors: list[Vector] = []
         self.contour_vectors: list[Vector] = []
         self.edges = []
         self.connectors = []
         self.contour = ([], [])
         self.centre = Vector(0, 0)
-        self.build_vectors(*args, **kwargs)
+        self.in_edge_idx: int | None = None 
+        self.out_edge_idx: int | None = None
+        self.build_vectors()
         self._build_edges()
         self._build_connectors()
         self._build_contour()
 
     @abstractmethod
-    def build_vectors(self, *args, **kwargs) -> None:
+    def build_vectors(self) -> None:
         pass
 
     @abstractmethod
@@ -38,6 +40,15 @@ class Shape(ABC):
     @abstractmethod
     def _build_connectors(self) -> None:
         pass
+
+    def set_connectors(self, in_edge_idx: int | None = None, out_edge_idx: int | None = None):
+
+        if in_edge_idx and in_edge_idx > len(self.edges) or out_edge_idx and out_edge_idx > len(self.edges):
+            raise Exception("Index should not be greater than the number of the shape's edges.")
+        
+        self.in_edge_idx = in_edge_idx
+        self.out_edge_idx = out_edge_idx
+        return self
 
     def _build_contour(self):
         self.contour = (
@@ -73,16 +84,15 @@ class Shape(ABC):
 
     def flip(self, axis: Literal["x", "y", "xy"]) -> None:
         for v in self.vectors:
-            if "x" in axis:
-                v.y = -v.y
-            if "y" in axis:
-                v.x = -v.x
+            if "x" in axis: v.y = -v.y
+            if "y" in axis: v.x = -v.x
 
         for v in self.contour_vectors:
-            if "x" in axis:
-                v.y = -v.y
-            if "y" in axis:
-                v.x = -v.x
+            if "x" in axis: v.y = -v.y
+            if "y" in axis: v.x = -v.x
+
+        if "x" in axis: self.centre.y *= -1
+        if "y" in axis: self.centre.x *= -1 
         
         self._build_edges()
         self._build_connectors()

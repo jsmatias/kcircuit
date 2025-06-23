@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
@@ -7,28 +8,27 @@ from ..shapes._vector import Vector
 
 class Circuit:
 
-    def __init__(self, config: list[dict[str, object]]):
-        self.shapes: list[Shape] = []
-        self.config = config
+    def __init__(self, shapes: Sequence[Shape]) -> None:
+        self.shapes = shapes
 
     def build(self):
-        prev_item = self.config[0]
-        self.shapes.append(prev_item["shape"])
-        for item in self.config[1:]:
-            prev_shape: Shape = prev_item["shape"]
-            out_edge: Vector = prev_shape.edges[prev_item["params"]["connector_out"]]
+        prev_shape = self.shapes[0]
+        for shape in self.shapes[1:]:
+            if shape.in_edge_idx is None or prev_shape.out_edge_idx is None:
+                raise Exception(
+                    "No connection idx found. "
+                    "Make sure to set the `in-` and `out_edge_idx` of the shapes."
+                )
 
-            shape = item["shape"]
-            in_edge = shape.edges[item["params"]["connector_in"]]
+            out_edge = prev_shape.edges[prev_shape.out_edge_idx]
+            out_connector = prev_shape.connectors[prev_shape.out_edge_idx]
+            in_edge = shape.edges[shape.in_edge_idx]
 
-            out_connector = prev_shape.connectors[prev_item["params"]["connector_out"]]
             angle_degrees = in_edge.angle_ccw_with(out_edge)
-
             shape.rotate(180 - angle_degrees)
-            in_connector = shape.connectors[item["params"]["connector_in"]]
+            in_connector = shape.connectors[shape.in_edge_idx]
             shape.shift(out_connector - in_connector)
-            self.shapes.append(shape)
-            prev_item = item
+            prev_shape = shape
 
     def shift(self, shift_vector: Vector):
         for s in self.shapes:
@@ -84,7 +84,7 @@ class Circuit:
         y_lims = (y_min - padding * height, y_max + padding * height)
 
         if ax is None:
-            _, ax = plt.subplots(figsize=(10, 10))
+            _, ax = plt.subplots()
 
         ax.set_aspect("equal")
 
