@@ -1,4 +1,6 @@
+from copy import deepcopy
 from collections.abc import Sequence
+
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
@@ -42,6 +44,13 @@ class Circuit:
 
     def centralize(self) -> None:
         self.shift(-1 * self.centre())
+
+    def mirror(self, x_axis_pos: float | None=None, y_axis_pos: float | None=None) -> None:
+        for shape in self.shapes:
+            shape.mirror(x_axis_pos, y_axis_pos)
+
+    def copy(self) -> "Circuit":
+        return deepcopy(self)
 
     def limit_points(self) -> tuple[tuple[float, float], tuple[float, float]]:
 

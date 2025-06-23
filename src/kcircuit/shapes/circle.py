@@ -5,7 +5,7 @@ from ._vector import Vector
 from .shape import Shape
 
 
-class Circular(Shape):
+class Circle(Shape):
 
     def __init__(self, width: float, radius: float, angle_degrees: float):
         self.width = width

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from abc import ABC, abstractmethod
 from typing import Literal
 
@@ -110,6 +111,8 @@ class Shape(ABC):
             self.flip(axis="x")
             self.shift(Vector(x_axis_pos, 0))
 
+    def copy(self) -> "Shape":
+        return deepcopy(self)
 
     def limit_points(self) -> tuple[tuple[float, float], tuple[float, float]]:
         x_min = min(self.contour[0]) 
