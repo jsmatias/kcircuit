@@ -107,9 +107,9 @@ class Shape(ABC):
             self.shift(Vector(y_axis_pos, 0))
         
         if x_axis_pos is not None:
-            self.shift(Vector(-x_axis_pos, 0))
+            self.shift(Vector(0, -x_axis_pos))
             self.flip(axis="x")
-            self.shift(Vector(x_axis_pos, 0))
+            self.shift(Vector(0, x_axis_pos))
 
     def copy(self) -> "Shape":
         return deepcopy(self)
@@ -124,7 +124,7 @@ class Shape(ABC):
 
 
     def plot(self, ax: Axes | None = None, show_indices: bool = False) -> Axes:
-        plt.ion()
+        # plt.ion()
         if ax is None:
             _, ax = plt.subplots(figsize=(7, 7))
 
@@ -140,22 +140,18 @@ class Shape(ABC):
             for i, connector in enumerate(self.connectors):
                 ax.text(connector.x, connector.y, str(i), fontsize=10, ha="right")
 
-        (x_min, y_min), (x_max, y_max) = self.limit_points()
+        # (x_min, y_min), (x_max, y_max) = self.limit_points()
 
-        min_size = 1.0
-        width = max(x_max - x_min, min_size)
-        height = max(y_max - y_min, min_size)
+        # min_size = 1.0
+        # width = max(x_max - x_min, min_size)
+        # height = max(y_max - y_min, min_size)
 
-        cx = (x_min + x_max) / 2
-        cy = (y_min + y_max) / 2
-        x_min, x_max = cx - width / 2, cx + width / 2
-        y_min, y_max = cy - height / 2, cy + height / 2
+        # cx = (x_min + x_max) / 2
+        # cy = (y_min + y_max) / 2
+        # x_min, x_max = cx - width / 2, cx + width / 2
+        # y_min, y_max = cy - height / 2, cy + height / 2
 
-        padding = 0.1
-        ax.set_xlim(x_min - padding * width, x_max + padding * width)
-        ax.set_ylim(y_min - padding * height, y_max + padding * height)
         ax.set_aspect("equal")
         ax.grid(ls="--")
-        plt.tight_layout()
 
         return ax

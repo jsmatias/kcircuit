@@ -58,10 +58,10 @@ class Circuit:
         x_min, x_max, y_min, y_max = None, None, None, None
         for shape in self.shapes:
             ((shape_x_min, shape_y_min), (shape_x_max, shape_y_max)) = shape.limit_points()
-            x_min = min(x_min, shape_x_min) if x_min else shape_x_min
-            y_min = min(y_min, shape_y_min) if y_min else shape_y_min
-            x_max = max(x_max, shape_x_max) if x_max else shape_x_max
-            y_max = max(y_max, shape_y_max) if y_max else shape_y_max
+            x_min = min(x_min, shape_x_min) if x_min is not None else shape_x_min
+            y_min = min(y_min, shape_y_min) if y_min is not None else shape_y_min
+            x_max = max(x_max, shape_x_max) if x_max is not None else shape_x_max
+            y_max = max(y_max, shape_y_max) if y_max is not None else shape_y_max
         
         if x_min is None or y_min is None or x_max is None or y_max is None:
             raise ValueError("At least one of the limit points of this circuit is a None value.")
@@ -74,30 +74,7 @@ class Circuit:
         return [shape.to_klayout() for shape in self.shapes]
 
     def plot(self, ax: Axes | None=None) -> Axes:
-        ((x_min, y_min), (x_max, y_max)) = self.limit_points()
-
-        min_width = 5
-        min_height = 5
-
-        width = x_max - x_min
-        height = y_max - y_min
-
-        if width < min_width:
-            center_x = (x_min + x_max) / 2
-            x_min = center_x - min_width / 2
-            x_max = center_x + min_width / 2
-            width = min_width
-
-        if height < min_height:
-            center_y = (y_min + y_max) / 2
-            y_min = center_y - min_height / 2
-            y_max = center_y + min_height / 2
-            height = min_height
-
-        padding = 0.1
-        x_lims = (x_min - padding * width, x_max + padding * width)
-        y_lims = (y_min - padding * height, y_max + padding * height)
-
+        
         if ax is None:
             _, ax = plt.subplots()
 
@@ -106,9 +83,6 @@ class Circuit:
         for shape in self.shapes:
             shape.plot(ax)
 
-        ax.set_xlim(*x_lims)
-        ax.set_ylim(*y_lims)
         ax.grid(ls="--")
-        plt.tight_layout()
         return ax
         
