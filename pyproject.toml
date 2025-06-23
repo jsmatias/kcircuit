@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kcircuit"
+version = "0.1.0"
+description = "A library for building and plotting geometric circuits of shapes including compatibility with Klayout official library."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+  { name = "Jean Matias", email = "smatias.jean@gmail.com" }
+]
+dependencies = [
+    "ipykernel==6.29.5",
+    "ipympl==0.9.7",
+    "klayout",
+    "matplotlib==3.10.3",
+    "numpy==2.3.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "black",
+  "mypy",
+  "pylint",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = ["C0114", "C0115", "C0116"]  # disable missing docstring warnings (optional)
