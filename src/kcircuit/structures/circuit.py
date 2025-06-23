@@ -1,5 +1,6 @@
 from copy import deepcopy
 from collections.abc import Sequence
+from typing import Literal
 
 import klayout.db as kdb
 import matplotlib.pyplot as plt
@@ -30,12 +31,13 @@ class Circuit:
             angle_degrees = in_edge.angle_ccw_with(out_edge)
             shape.rotate(180 - angle_degrees)
             in_connector = shape.connectors[shape.in_edge_idx]
-            shape.shift(out_connector - in_connector)
+            shift_vector = out_connector - in_connector
+            shape.shift(shift_vector.x, shift_vector.y)
             prev_shape = shape
 
-    def shift(self, shift_vector: Vector):
+    def shift(self, delta_x: float, delta_y: float) -> None:
         for s in self.shapes:
-            s.shift(shift_vector)
+            s.shift(delta_x, delta_y)
 
     def centre(self) -> Vector:
         (x_min, y_min), (x_max, y_max) = self.limit_points()
@@ -44,7 +46,8 @@ class Circuit:
         return Vector(x_centre, y_centre)
 
     def centralize(self) -> None:
-        self.shift(-1 * self.centre())
+        shift_vector = -1 * self.centre()
+        self.shift(shift_vector.x, shift_vector.y)
 
     def mirror(self, x_axis_pos: float | None=None, y_axis_pos: float | None=None) -> None:
         for shape in self.shapes:
@@ -68,21 +71,23 @@ class Circuit:
 
         return (x_min, y_min), (x_max, y_max)
     
-    def to_klayout(self) -> list[kdb.Polygon]:
+    def to_klayout(self, unit: Literal["nm", "um", "mm"]="nm") -> list[kdb.Polygon]:
         """Export all shapes in the circuit to a list of Klayout Polygons.
+        All values are converted to nm.
         """
-        return [shape.to_klayout() for shape in self.shapes]
+        return [shape.to_klayout(unit) for shape in self.shapes]
 
-    def plot(self, ax: Axes | None=None) -> Axes:
+    def plot(self, ax: Axes | None=None, allow_stretch:bool=False) -> Axes:
         
         if ax is None:
-            _, ax = plt.subplots()
-
-        ax.set_aspect("equal")
+            _, ax = plt.subplots(figsize=(10, 7))
 
         for shape in self.shapes:
             shape.plot(ax)
 
+        ax.set_aspect("auto" if allow_stretch else "equal", "datalim")
         ax.grid(ls="--")
+        fig = ax.get_figure()
+        fig.tight_layout()
         return ax
         

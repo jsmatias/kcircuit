@@ -1,1 +1,1 @@
-from .structure import Circuit #type:ignore
+from .circuit import Circuit #type:ignore

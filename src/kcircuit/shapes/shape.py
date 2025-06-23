@@ -57,12 +57,27 @@ class Shape(ABC):
             [v.y for v in self.contour_vectors + [self.contour_vectors[0]]],
         )
 
-    def to_klayout(self, unit:str = "nm") -> kdb.Polygon:
-        """Convert to int considering units!"""
-        points = [kdb.Point(int(x), int(y)) for x, y in zip(self.contour[0], self.contour[1])]
+    def to_klayout(self, unit:Literal["mm", "um", "nm"] = "nm") -> kdb.Polygon:
+        """Export to Klayout Polygon.
+        All values are converted to nm.
+        """
+        if unit not in ("mm", "um", "nm"):
+            raise Exception("Please especify a valid unit: 'nm', 'um' or 'mm'.")
+        
+        points: list[kdb.Point] = []
+        for x, y in zip(self.contour[0], self.contour[1]):
+            factor = 1
+            if unit=="um":
+                factor = 1000 
+            if unit=="mm": 
+                factor = 1000000
+
+            points.append(kdb.Point(round(factor * x), round(factor * y)))
+
         return kdb.Polygon(points)
 
-    def shift(self, shift_vector: Vector) -> None:
+    def shift(self, delta_x: float, delta_y: float) -> None:
+        shift_vector = Vector(delta_x, delta_y)
         self.vectors = [v + shift_vector for v in self.vectors]
         self.contour_vectors = [v + shift_vector for v in self.contour_vectors]
 
@@ -102,14 +117,14 @@ class Shape(ABC):
     def mirror(self, x_axis_pos: float | None=None, y_axis_pos: float | None=None) -> None:
         
         if y_axis_pos is not None:
-            self.shift(Vector(-y_axis_pos, 0))
+            self.shift(-y_axis_pos, 0)
             self.flip(axis="y")
-            self.shift(Vector(y_axis_pos, 0))
+            self.shift(y_axis_pos, 0)
         
         if x_axis_pos is not None:
-            self.shift(Vector(0, -x_axis_pos))
+            self.shift(0, -x_axis_pos)
             self.flip(axis="x")
-            self.shift(Vector(0, x_axis_pos))
+            self.shift(0, x_axis_pos)
 
     def copy(self) -> "Shape":
         return deepcopy(self)
@@ -123,10 +138,11 @@ class Shape(ABC):
         return (x_min, y_min), (x_max, y_max)
 
 
-    def plot(self, ax: Axes | None = None, show_indices: bool = False) -> Axes:
-        # plt.ion()
+    def plot(self, ax: Axes | None=None, show_indices: bool=False, allow_stretch:bool=False) -> Axes:
         if ax is None:
-            _, ax = plt.subplots(figsize=(7, 7))
+            _, ax = plt.subplots(figsize=(10, 7))
+            ax.set_aspect("auto" if allow_stretch else "equal", "datalim")
+            ax.grid(ls="--")
 
         x, y = self.contour
         ax.plot(x, y, color="orangered")
@@ -139,19 +155,7 @@ class Shape(ABC):
         if show_indices:
             for i, connector in enumerate(self.connectors):
                 ax.text(connector.x, connector.y, str(i), fontsize=10, ha="right")
-
-        # (x_min, y_min), (x_max, y_max) = self.limit_points()
-
-        # min_size = 1.0
-        # width = max(x_max - x_min, min_size)
-        # height = max(y_max - y_min, min_size)
-
-        # cx = (x_min + x_max) / 2
-        # cy = (y_min + y_max) / 2
-        # x_min, x_max = cx - width / 2, cx + width / 2
-        # y_min, y_max = cy - height / 2, cy + height / 2
-
-        ax.set_aspect("equal")
-        ax.grid(ls="--")
+        fig = ax.get_figure()
+        fig.tight_layout()
 
         return ax
