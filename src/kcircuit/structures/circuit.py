@@ -1,6 +1,7 @@
 from copy import deepcopy
 from collections.abc import Sequence
 
+import klayout.db as kdb
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
@@ -66,6 +67,11 @@ class Circuit:
             raise ValueError("At least one of the limit points of this circuit is a None value.")
 
         return (x_min, y_min), (x_max, y_max)
+    
+    def to_klayout(self) -> list[kdb.Polygon]:
+        """Export all shapes in the circuit to a list of Klayout Polygons.
+        """
+        return [shape.to_klayout() for shape in self.shapes]
 
     def plot(self, ax: Axes | None=None) -> Axes:
         ((x_min, y_min), (x_max, y_max)) = self.limit_points()
